@@ -1,0 +1,11 @@
+{
+  "name": "tbb-manual-image-creator",
+  "version": "0.0.1",
+  "description": "make tbb manual in many locales",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Arthur Edelstein",
+  "license": "ISC"
+}
