@@ -11,6 +11,9 @@
   "dependencies": {
     "desktop-screenshot": "^0.1.1",
     "iohook": "^0.2.0",
+    "jsdom": "^12.0.0",
+    "request": "^2.87.0",
+    "request-promise-native": "^1.0.5",
     "robotjs": "^0.5.1",
     "screenshot-desktop": "^1.5.0"
   }
