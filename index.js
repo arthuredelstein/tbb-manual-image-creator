@@ -1,5 +1,7 @@
 const ioHook = require('iohook');
 const robot = require("robotjs");
+const Jimp = require('jimp');
+
 const { KEYS } = require("./keyconstants.js");
 
 const BUTTONS = [null, "left", "middle", "right"];
@@ -69,6 +71,7 @@ let playback = async (eventSeries) => {
         }
       }
     }
+    // Make sure all keys are up at the end.
     for (let code of downKeys) {
       robot.keyToggle(code, "up");
     }
@@ -78,4 +81,8 @@ let playback = async (eventSeries) => {
 (async () => {
   let series = await recordSeries();
   await playback(series);
+  let { image, width, height, bitsPerPixel } = robot.screen.capture();
+  jimp = new Jimp(10, 10);
+  jimp.bitmap = {data: image, width, height };
+  jimp.write("test1.png");
 })();
