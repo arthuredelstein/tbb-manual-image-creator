@@ -2,7 +2,10 @@ const robot = require("robotjs");
 const Jimp = require('jimp');
 const request = require('request-promise-native');
 const util = require('util');
+const child_process = require('child_process');
+const spawn = child_process.spawn;
 const exec = util.promisify(require('child_process').exec);
+const { promises: fs } = require('fs');
 const { JSDOM } = require("jsdom");
 
 const { recordInput, playbackInput } = require("./user-input-repeater.js");
@@ -45,16 +48,27 @@ let langpack_urls = async (version) => {
   return items;
 };
 
+let start_tor_browser = async (tor_browser_dir, locale) => {
+  let profileDir = `${tor_browser_dir}/Browser/TorBrowser/Data/Browser/profile.default/`;
+  console.log(profileDir);
+  // Wipe custom prefs each time to make behavior reproducible.
+  await fs.unlink(profileDir + "prefs.js");
+  await fs.writeFile(profileDir + "user.js", `user_pref('intl.locale.requested', '${locale}');\n`);
+  return spawn(`${tor_browser_dir}/Browser/firefox`);
+};
+
 (async () => {
   let version = await get_firefox_version(tor_browser_dir);
   console.log(version);
-  let result = await langpack_urls(version);
-  console.log(result);
-//  console.log(result);
-/*  let series = await recordInput();
+  console.log(await langpack_urls(version));
+  let browserProcess = await start_tor_browser(tor_browser_dir, "en-US");
+  let series = await recordInput();
+  browserProcess.kill();
+  let browserProcess2 = await start_tor_browser(tor_browser_dir, "de-DE");
   await playbackInput(series);
   let { image, width, height } = robot.screen.capture();
-  await writeImageBuffer("test2.png", { buffer: image, width, height,
-  bufferFormat: "bgra"});*/
-  
+  await writeImageBuffer("browser_screenshot.png",
+                         { buffer: image, bufferFormat: "bgra",
+                           width, height });
+  browserProcess2.kill();
 })();
