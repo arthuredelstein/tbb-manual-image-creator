@@ -94,12 +94,13 @@ let captureRawImage = async ({locale, imageDir, imageName}) => {
   return filename;
 };
 
-let acquireImagesForLocales = async ({inputSeries, imageName,
-                                      locales, imageDir}) => {
+let acquireImagesForLocales = async function* ({inputSeries, imageName,
+                                                locales, imageDir}) {
   for (let locale of locales) {
     let browserProcess = await start_tor_browser(tor_browser_dir, locale);
     await playBackInput(inputSeries);
-    await captureRawImage({locale, imageDir, imageName});
+    let filename = await captureRawImage({locale, imageDir, imageName})
+    yield(locale);
     browserProcess.kill();
   }
 };

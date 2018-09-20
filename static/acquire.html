@@ -16,6 +16,13 @@
        socket.onmessage = handleMessage;
      })();
 
+     let send = obj => socket.send(JSON.stringify(obj));
+
+     let acquire = () => {
+       let { imageName } = JSON.parse(document.cookie);
+       send({"cmd":"acquire", imageName });
+     };
+
      addEventListener("load", () => {
        let { imageName } = JSON.parse(document.cookie);
        let firstImage = document.getElementById("firstImage");
@@ -24,6 +31,10 @@
     </script>
     <h1>Tor Browser Screenshot Acquisition</h1>
     <img id="firstImage">
-    <p>Click here to start: <button>Acquire!</button></p>
+    <p>Click here to start:
+      <button id="acquire" onclick="acquire();">
+        Acquire!
+      </button>
+    </p>
   </body>
 </html>
