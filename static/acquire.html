@@ -6,8 +6,12 @@
   </head>
   <body>
     <script>
-     let handleMessage = (msg) => {
-       console.log(msg);
+     let handleMessage = (e) => {
+       let { state, locale, imageName } = JSON.parse(e.data);
+       switch (state) {
+         case "acquired":
+           document.body.innerHTML += `<p><img src='/final/${locale}/${imageName}.png'></p>`;
+       };
      };
      let socket;
      (async () => {
@@ -19,8 +23,8 @@
      let send = obj => socket.send(JSON.stringify(obj));
 
      let acquire = () => {
-       let { imageName } = JSON.parse(document.cookie);
-       send({"cmd":"acquire", imageName });
+       let details = JSON.parse(document.cookie);
+       send(Object.assign({"cmd":"acquire"}, details));
      };
 
      addEventListener("load", () => {
