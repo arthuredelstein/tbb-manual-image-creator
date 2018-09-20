@@ -13,14 +13,14 @@
   </head>
   <body>
     <script>
-     let croppie1 = null;
+     let croppr1 = null;
      let handleMessage = e => {
        let { state, filename } = JSON.parse(e.data);
        switch (state) {
          case "recorded":
            let img1 = document.getElementById("first-screenshot");
            img1.src = filename;
-           croppie1 = new Croppr(img1, {});
+           croppr1 = new Croppr(img1, { startSize: [90, 90, '%'] });
            break;
        }
      };
@@ -33,21 +33,27 @@
        socket.send(JSON.stringify({"cmd":"ready"}));
      })();
 
+     let getImageName = () => document.getElementById("screenshot-name").value;
+
+     let send = obj => socket.send(JSON.stringify(obj));
      let startRecording = () => {
-       let imageName = document.getElementById("screenshot-name").value;
+       let imageName = getImageName();
        if (imageName.length === 0) {
          alert("Please choose a screenshot name");
        } else {
-         socket.send(JSON.stringify({"cmd":"record", imageName }));
+         send({"cmd":"record", imageName });
        }
      };
-     let manualCropDone = () => {
-       let firstCropResults = cropper.getValue();
-       socket.send(JSON.stringify("cmd":"acquire", firstCropResults);
+     let manualCropDone = async () => {
+       let results = croppr1.getValue();
+       results.imageName = getImageName();
+       document.cookie = JSON.stringify(results);
+       send(Object.assign({"cmd":"crop"}, results));
+       location.href = "/acquire.html";
      };
     </script>
-    <h1>Tor Browser Manual Screenshot Creator</h1>
-    <h2>Setup</h2>
+    <h1>Tor Browser Manual Screenshot Creator Setup</h1>
+    <h2>Paths</h2>
     <p>Enter Tor Browser path: <input id="tbb-path"></input></p>
     <p>Enter Tor Browser Manual path: <input id="tbb-path"></input></p>
     <h2>Capture first screenshot (en-US)</h2>

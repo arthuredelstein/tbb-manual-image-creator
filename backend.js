@@ -111,6 +111,13 @@ let recordInputSeries = async ({locale, imageDir, imageName}) => {
   browserProcess.kill();
   return { filename, inputSeries };
 };
+
+let cropImage = async ({srcFile, destFile, rect: {x, y, w, h}}) => {
+  let image = await Jimp.read(srcFile);
+  image.crop(x, y, w, h);
+  await new Promise(resolve => image.write(destFile, resolve));
+};
+
 /*
 (async () => {
   let version = await get_firefox_version(tor_browser_dir);
@@ -124,4 +131,5 @@ let recordInputSeries = async ({locale, imageDir, imageName}) => {
 */
 module.exports = { recordInputSeries,
                    download_langpacks,
-                   acquireImagesForLocales };
+                   acquireImagesForLocales,
+                   cropImage};
