@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf8">
+    <title>Tor Browser Screenshot Acquisition</title>
+  </head>
+  <body>
+    <script>
+     let handleMessage = (msg) => {
+       console.log(msg);
+     };
+     let socket;
+     (async () => {
+       socket = new WebSocket("ws://localhost:3000/websocket");
+       await new Promise(resolve => { socket.onopen = resolve; });
+       socket.onmessage = handleMessage;
+     })();
+
+     addEventListener("load", () => {
+       let { imageName } = JSON.parse(document.cookie);
+       let firstImage = document.getElementById("firstImage");
+       firstImage.src = `/final/en-US/${imageName}.png`;
+     });
+    </script>
+    <h1>Tor Browser Screenshot Acquisition</h1>
+    <img id="firstImage">
+    <p>Click here to start: <button>Acquire!</button></p>
+  </body>
+</html>
