@@ -8,7 +8,7 @@ const BUTTONS = [null, "left", "middle", "right"];
 
 let sleep = timeMs => new Promise(resolve => setTimeout(resolve, timeMs));
 
-let recordSeries = () => new Promise(resolve => {
+let recordInput = () => new Promise(resolve => {
   let eventSeries = [];
   let startTime = Date.now();
   for (let type of ["mousedown", "mousedrag", "mouseup", "mousemove", "mousewheel", "keydown", "keyup"]) {
@@ -29,7 +29,7 @@ let recordSeries = () => new Promise(resolve => {
 let robotKeyCode = (ioHookKeyCode) =>
     ioHookKeyCode && KEYS[ioHookKeyCode.toString()];
 
-let playback = async (eventSeries) => {
+let playBackInput = async (eventSeries) => {
   let startTime = Date.now();
   let downKeys = new Set();
   for (let event of eventSeries) {
@@ -78,3 +78,5 @@ let playback = async (eventSeries) => {
     }
   }
 };
+
+module.exports = { recordInput, playBackInput };

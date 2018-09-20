@@ -11,7 +11,7 @@ const path = require('path');
 const mkdirp = require('mkdirp-promise');
 const { JSDOM } = require("jsdom");
 
-const { recordInput, playbackInput } = require("./user-input-repeater.js");
+const { recordInput, playBackInput } = require("./user-input-repeater.js");
 
 let writeImageBuffer = (file, {buffer, width, height, bufferFormat }) =>
   new Promise((resolve, reject) => {
@@ -91,7 +91,7 @@ let acquireImagesForLocales = async ({inputSeries, imageName,
                                          locales, imageDir}) => {
   for (let locale of locales) {
     let browserProcess2 = await start_tor_browser(tor_browser_dir, locale);
-    await playbackInput(inputSeries);
+    await playBackInput(inputSeries);
     await mkdirp(`${imageDir}/${locale}/`);
     captureScreenToFile(`${imageDir}/${locale}/${imageName}.png`);
     browserProcess2.kill();
