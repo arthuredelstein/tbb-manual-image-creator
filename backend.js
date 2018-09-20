@@ -6,7 +6,6 @@ const child_process = require('child_process');
 const spawn = child_process.spawn;
 const exec = util.promisify(require('child_process').exec);
 const fs = require('fs');
-const fsAsync = fs.promises;
 const path = require('path');
 const mkdirp = require('mkdirp-promise');
 const { JSDOM } = require("jsdom");
@@ -40,6 +39,14 @@ let get_firefox_version = async (path) => {
   return stdout.match(/Mozilla Firefox (\S+)/)[1];
 };
 
+let get_manual_locales = async (manual_dir) =>
+  fs.readdirSync(manual_dir)
+    .map(f => path.join(manual_dir, f)) // full path name
+    .filter(f => fs.statSync(f).isDirectory()) // take only directories
+    .filter(f => fs.existsSync(path.join(f, "media"))) // dirs with media subdir
+    .map(f => path.basename(f)) // basename is the locale name
+    .map(locale => locale !== "C"); // remove the "C" locale
+
 let langpack_urls = async (version) => {
   let baseUrl = `https://ftp.mozilla.org/pub/firefox/releases/${version}esr/linux-x86_64/xpi/`;
   let indexPage = await request(baseUrl);
@@ -71,12 +78,12 @@ let download_langpacks = async (version) => {
   console.log("langpacks are fully downloaded");
 };
 
-let start_tor_browser = async (tor_browser_dir, locale) => {
+let start_tor_browser = (tor_browser_dir, locale) => {
   let profileDir = `${tor_browser_dir}/Browser/TorBrowser/Data/Browser/profile.default/`;
   console.log(profileDir);
   // Wipe custom prefs each time to make behavior reproducible.
-  await fsAsync.unlink(profileDir + "prefs.js");
-  await fsAsync.writeFile(profileDir + "user.js", `user_pref('intl.locale.requested', '${locale}');\n`);
+  fs.unlinkSync(profileDir + "prefs.js");
+  fs.writeFileSync(profileDir + "user.js", `user_pref('intl.locale.requested', '${locale}');\n`);
   return spawn(`${tor_browser_dir}/Browser/firefox`);
 };
 
@@ -97,7 +104,7 @@ let captureRawImage = async ({locale, imageDir, imageName}) => {
 let acquireImagesForLocales = async function* ({inputSeries, imageName,
                                                 locales, imageDir}) {
   for (let locale of locales) {
-    let browserProcess = await start_tor_browser(tor_browser_dir, locale);
+    let browserProcess = start_tor_browser(tor_browser_dir, locale);
     await playBackInput(inputSeries);
     let filename = await captureRawImage({locale, imageDir, imageName})
     yield(locale);
@@ -106,7 +113,7 @@ let acquireImagesForLocales = async function* ({inputSeries, imageName,
 };
 
 let recordInputSeries = async ({locale, imageDir, imageName}) => {
-  let browserProcess = await start_tor_browser(tor_browser_dir, locale);
+  let browserProcess = start_tor_browser(tor_browser_dir, locale);
   let inputSeries = await recordInput();
   let filename = await captureRawImage({locale, imageDir, imageName});
   browserProcess.kill();
@@ -119,18 +126,10 @@ let cropImage = async ({srcFile, destFile, rect: {x, y, w, h}}) => {
   await new Promise(resolve => image.write(destFile, resolve));
 };
 
-/*
-(async () => {
-  let version = await get_firefox_version(tor_browser_dir);
-  await download_langpacks(version);
-  let inputSeries = await recordInputSeries();
-  let locales = ["en-US", "de-DE", "fr-FR", "es-ES"];
-  await acquireImagesForLocales(
-    {inputSeries, imageName: "captcha", locales, imageDir: "images"});
-  console.log("done!");
-})();
-*/
-module.exports = { recordInputSeries,
-                   download_langpacks,
-                   acquireImagesForLocales,
-                   cropImage};
+module.exports = {
+  acquireImagesForLocales,
+  cropImage,
+  download_langpacks,
+  get_manual_locales
+  recordInputSeries,
+};
