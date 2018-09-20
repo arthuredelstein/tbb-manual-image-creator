@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf8"/>
+    <title>Tor Browser Manual Screenshot Creator</title>
+  </head>
+  <body>
+    <script>
+     let handleMessage = e => {
+       let { state, filename } = JSON.parse(e.data);
+       switch (state) {
+         case "recorded":
+           let img1 = document.getElementById("first-screenshot");
+           img1.src = `./${filename}`;
+           break;
+       }
+     };
+
+     let socket;
+     (async () => {
+       socket = new WebSocket("ws://localhost:3000/websocket");
+       await new Promise(resolve => { socket.onopen = resolve; });
+       socket.onmessage = handleMessage;
+       socket.send(JSON.stringify({"cmd":"ready"}));
+     })();
+
+     let startRecording = () => {
+       let imageName = document.getElementById("screenshot-name").value;
+       if (imageName.length === 0) {
+         alert("Please choose a screenshot name");
+       } else {
+         socket.send(JSON.stringify({"cmd":"record", imageName }));
+       }
+     };
+    </script>
+    <h1>Tor Browser Manual Screenshot Creator</h1>
+    <h2>Setup</h2>
+    <p>Enter Tor Browser path: <input id="tbb-path"></input></p>
+    <p>Enter Tor Browser Manual path: <input id="tbb-path"></input></p>
+    <h2>Capture screenshots</h2>
+    <p>Enter screenshot name: <input id="screenshot-name"></input></p>
+    <p>
+      <button id="record" onclick="startRecording()">
+        Start recording
+      </button>
+      (Ctrl-Space to Stop and Take Screenshot)</p>
+    <p>
+      <img id="first-screenshot" src="" width="30%"></img>
+    </p>
+  </body>
+</html>

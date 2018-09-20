@@ -87,24 +87,31 @@ let captureScreenToFile = async (filename) => {
                            width, height });
 };
 
+let captureRawImage = async ({locale, imageDir, imageName}) => {
+  await mkdirp(`${imageDir}/${locale}/`);
+  let filename = `${imageDir}/${locale}/${imageName}.png`
+  await captureScreenToFile(filename);
+  return filename;
+};
+
 let acquireImagesForLocales = async ({inputSeries, imageName,
-                                         locales, imageDir}) => {
+                                      locales, imageDir}) => {
   for (let locale of locales) {
-    let browserProcess2 = await start_tor_browser(tor_browser_dir, locale);
+    let browserProcess = await start_tor_browser(tor_browser_dir, locale);
     await playBackInput(inputSeries);
-    await mkdirp(`${imageDir}/${locale}/`);
-    captureScreenToFile(`${imageDir}/${locale}/${imageName}.png`);
-    browserProcess2.kill();
+    await captureRawImage({locale, imageDir, imageName});
+    browserProcess.kill();
   }
 };
 
-let recordInputSeries = async () => {
-  let browserProcess = await start_tor_browser(tor_browser_dir, "en-US");
-  let series = await recordInput();
+let recordInputSeries = async ({locale, imageDir, imageName}) => {
+  let browserProcess = await start_tor_browser(tor_browser_dir, locale);
+  let inputSeries = await recordInput();
+  let filename = await captureRawImage({locale, imageDir, imageName});
   browserProcess.kill();
-  return series;
+  return { filename, inputSeries };
 };
-
+/*
 (async () => {
   let version = await get_firefox_version(tor_browser_dir);
   await download_langpacks(version);
@@ -114,3 +121,7 @@ let recordInputSeries = async () => {
     {inputSeries, imageName: "captcha", locales, imageDir: "images"});
   console.log("done!");
 })();
+*/
+module.exports = { recordInputSeries,
+                   download_langpacks,
+                   acquireImagesForLocales };
