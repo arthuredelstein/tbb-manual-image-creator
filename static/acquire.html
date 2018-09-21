@@ -61,6 +61,7 @@
      };
 
      let acquire = async () => {
+       document.getElementById("acquire").style.display = "none";
        let { imageName, x, y, w, h } = JSON.parse(document.cookie);
        let locales = await request("locales", { manual_dir: "../user-manual"});
        console.log(locales);
@@ -112,8 +113,8 @@
     </script>
     <h1>Tor Browser Screenshot Acquisition</h1>
     <img id="firstImage">
-    <p>Click here to start:
-      <button id="acquire" onclick="acquire();">
+    <p id="acquire">Click here to start:
+      <button onclick="acquire();">
         Acquire all!
       </button>
     </p>
