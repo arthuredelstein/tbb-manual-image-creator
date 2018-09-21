@@ -95,6 +95,8 @@
                                     block: "nearest",
                                     inline: "nearest"});
        }
+       let gitAddButton = document.getElementById("git-add");
+       gitAddButton.style.display = "inline";
      };
 
      let gitAdd = async () => {
@@ -117,7 +119,7 @@
     </p>
     <div id="results">
     </div>
-    <button id="git-add" onclick="gitAdd();">
+    <button id="git-add" style="display:none" onclick="gitAdd();">
       git add
     </button>
   </body>
