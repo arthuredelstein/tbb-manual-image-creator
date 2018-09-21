@@ -23,6 +23,12 @@
 
      let sleep = delta => new Promise(resolve => setTimeout(resolve, delta));
 
+     let setDisplay = (selector, state) =>
+       [...document.querySelectorAll(selector)]
+         .map(el => el.style.display = state);
+
+     let showAll = (selector) => setDisplay(selector, "inline");
+
      let recrop = async ({imageName, locale}) => {
        console.log("recrop", locale);
        try {
@@ -71,8 +77,8 @@
            `<hr>
              <p id="${locale}">
               user-manual/${locale}/media/${imageName}.png
-              <button class="recrop">Recrop</button>
-              <button class="reacquire">Re-acquire</button>
+              <button class="recrop" style="display:none">Recrop</button>
+              <button class="reacquire" style="display:none">Re-acquire</button>
               <button class="done" style="display:none">Done cropping</button>
               <br>
               <img class="small">
@@ -96,6 +102,8 @@
                                     block: "nearest",
                                     inline: "nearest"});
        }
+       showAll(".recrop");
+       showAll(".reacquire");
        let gitAddButton = document.getElementById("git-add");
        gitAddButton.style.display = "inline";
      };
