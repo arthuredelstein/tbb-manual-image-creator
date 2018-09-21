@@ -45,7 +45,7 @@ let get_manual_locales = async (manual_dir) =>
     .filter(f => fs.statSync(f).isDirectory()) // take only directories
     .filter(f => fs.existsSync(path.join(f, "media"))) // dirs with media subdir
     .map(f => path.basename(f)) // basename is the locale name
-    .map(locale => locale !== "C"); // remove the "C" locale
+    .filter(locale => locale !== "C"); // remove the "C" locale
 
 let langpack_urls = async (version) => {
   let baseUrl = `https://ftp.mozilla.org/pub/firefox/releases/${version}esr/linux-x86_64/xpi/`;
@@ -64,25 +64,27 @@ let downloadFile = (url, diskPath) => new Promise(
     .on("finish", resolve));
 
 let download_langpacks = async (version) => {
-  let xpiDir = `${tor_browser_dir}/Browser/TorBrowser/Data/Browser/profile.default/extensions`;
+  let xpiDir = path.join(tor_browser_dir, "Browser/TorBrowser/Data/Browser/profile.default/extensions");
   let langpacks = await langpack_urls(version);
   for (let langpack of langpacks) {
     let remoteFileName = path.basename(langpack);
     let locale = remoteFileName.split(".")[0];
-    let destFile = `${xpiDir}/langpack-${locale}@firefox.mozilla.org.xpi`;
+    let destFile = path.join(xpiDir, `langpack-${locale}@firefox.mozilla.org.xpi`);
     if (!fs.existsSync(destFile)) {
       console.log(`downloading ${langpack}`);
-      await downloadFile(langpack, `${xpiDir}/langpack-${locale}@firefox.mozilla.org.xpi`);
+      await downloadFile(langpack, destFile);
     }
   }
   console.log("langpacks are fully downloaded");
 };
 
 let start_tor_browser = (tor_browser_dir, locale) => {
-  let profileDir = `${tor_browser_dir}/Browser/TorBrowser/Data/Browser/profile.default/`;
+  let profileDir = path.join(tor_browser_dir, "Browser/TorBrowser/Data/Browser/profile.default/");
   console.log(profileDir);
   // Wipe custom prefs each time to make behavior reproducible.
-  fs.unlinkSync(profileDir + "prefs.js");
+  try {
+    fs.unlinkSync(path.join(profileDir, "prefs.js"));
+  } catch (e) {}
   fs.writeFileSync(profileDir + "user.js", `user_pref('intl.locale.requested', '${locale}');\n`);
   return spawn(`${tor_browser_dir}/Browser/firefox`);
 };
@@ -101,15 +103,12 @@ let captureRawImage = async ({locale, imageDir, imageName}) => {
   return filename;
 };
 
-let acquireImagesForLocales = async function* ({inputSeries, imageName,
-                                                locales, imageDir}) {
-  for (let locale of locales) {
-    let browserProcess = start_tor_browser(tor_browser_dir, locale);
-    await playBackInput(inputSeries);
-    let filename = await captureRawImage({locale, imageDir, imageName})
-    yield(locale);
-    browserProcess.kill();
-  }
+let acquireImageForLocale = async ({inputSeries, imageName, locale, imageDir}) => {
+  let browserProcess = start_tor_browser(tor_browser_dir, locale);
+  await playBackInput(inputSeries);
+  let filename = await captureRawImage({locale, imageDir, imageName})
+  browserProcess.kill();
+  return filename;
 };
 
 let recordInputSeries = async ({locale, imageDir, imageName}) => {
@@ -120,16 +119,16 @@ let recordInputSeries = async ({locale, imageDir, imageName}) => {
   return { filename, inputSeries };
 };
 
-let cropImage = async ({srcFile, destFile, rect: {x, y, w, h}}) => {
+let cropImage = async ({srcFile, destFile, x, y, w, h}) => {
   let image = await Jimp.read(srcFile);
   image.crop(x, y, w, h);
   await new Promise(resolve => image.write(destFile, resolve));
 };
 
 module.exports = {
-  acquireImagesForLocales,
+  acquireImageForLocale,
   cropImage,
   download_langpacks,
-  get_manual_locales
+  get_manual_locales,
   recordInputSeries,
 };

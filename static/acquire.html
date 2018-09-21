@@ -3,42 +3,115 @@
   <head>
     <meta charset="utf8">
     <title>Tor Browser Screenshot Acquisition</title>
+    <script src="utils.js"></script>
+    <link rel="stylesheet" href="thirdparty/croppr.min.css">
+    <script src="thirdparty/croppr.min.js"></script>
   </head>
   <body>
     <script>
-     let handleMessage = (e) => {
-       let { state, locale, imageName } = JSON.parse(e.data);
-       switch (state) {
-         case "acquired":
-           document.body.innerHTML += `<p><img src='/final/${locale}/${imageName}.png'></p>`;
+     let reacquire = async ({imageName, locale}) => {
+       console.log("reacquire", locale);
+       try {
+         let { filename } = await request("prepare", { imageName, locale, record: false });
+         let img1 = document.querySelector(`p#${locale} img`);
+         img1.src = `${filename}?${performance.now()}`;
+         recrop({imageName, locale});
+       } catch (e) {
+         console.log(e);
+       }
+     };
+
+     let sleep = delta => new Promise(resolve => setTimeout(resolve, delta));
+
+     let recrop = async ({imageName, locale}) => {
+       console.log("recrop", locale);
+       try {
+         let imageBigContainer = document.querySelector(`p#${locale} span.big`);
+         let imageSmall = document.querySelector(`p#${locale} img.small`);
+         imageBigContainer.innerHTML = `<img src="images/${locale}/${imageName}.png?${performance.now()}">`;
+         imageBigContainer.style.display = "inline";
+         imageSmall.style.display = "none";
+         let croppr = new Croppr(imageBigContainer.children[0],
+                                 { startSize: [90, 90, '%'] });
+         let recropButton = document.querySelector(`p#${locale} button.recrop`);
+         let doneButton = document.querySelector(`p#${locale} button.done`);
+         let recropDone = async () => {
+           try {
+             doneButton.style.display = "none";
+             let { x, y, width, height } = croppr.getValue();
+             console.log(x,y,width,height);
+             await request("crop", {
+               locale,
+               imageName,
+               x, y, w: width, h: height,
+             });
+             await sleep(100);
+             imageSmall.style.display = "inline";
+             imageSmall.src = `final/${locale}/${imageName}.png?` + performance.now();
+             imageBigContainer.innerHTML = "";
+           } catch (e) {
+             console.log(e);
+           }
+         };
+         doneButton.addEventListener("click", recropDone, { once: true});
+         doneButton.style.display = "inline";
+       } catch (e) {
+         console.log(e);
+       }
+     };
+
+     let acquire = async () => {
+       let locales = await request("locales", { manual_dir: "../user-manual"});
+       console.log(locales);
+       let resultsHTML = "";
+       for (let locale of locales) {
+         resultsHTML +=
+           `<hr>
+             <p id="${locale}">
+              ${locale}
+              <button class="recrop">Recrop</button>
+              <button class="reacquire">Re-acquire</button>
+              <button class="done" style="display:none">Done cropping</button>
+              <br>
+              <img class="small">
+              <span class="big"></span>
+             </p>`;
+         document.getElementById("results").innerHTML = resultsHTML;
        };
+       await sleep(100);
+       let { imageName, x, y, w, h } = JSON.parse(document.cookie);
+       for (let locale of locales) {
+         document.querySelector(`p#${locale} button.reacquire`)
+                 .addEventListener("click", () => reacquire({imageName, locale}));
+         document.querySelector(`p#${locale} button.recrop`)
+                 .addEventListener("click", () => recrop({imageName, locale}));
+       }
+       for (let locale of locales.slice(0,1)) {
+         await request("acquire", { locale, imageName, x, y, w, h });
+         await sleep(100);
+         let imageSmall = document.querySelector(`p#${locale} img.small`);
+         imageSmall.src = `/final/${locale}/${imageName}.png?${performance.now()}`;
+         imageSmall.scrollIntoView({behavior: "smooth",
+                                    block: "nearest",
+                                    inline: "nearest"});
+       }
      };
-     let socket;
-     (async () => {
-       socket = new WebSocket("ws://localhost:3000/websocket");
-       await new Promise(resolve => { socket.onopen = resolve; });
-       socket.onmessage = handleMessage;
-     })();
 
-     let send = obj => socket.send(JSON.stringify(obj));
-
-     let acquire = () => {
-       let details = JSON.parse(document.cookie);
-       send(Object.assign({"cmd":"acquire"}, details));
-     };
 
      addEventListener("load", () => {
-       let { imageName } = JSON.parse(document.cookie);
+       let { imageName, x, y, w, h } = JSON.parse(document.cookie);
        let firstImage = document.getElementById("firstImage");
-       firstImage.src = `/final/en-US/${imageName}.png`;
+       firstImage.src = `/final/en-US/${imageName}.png?${performance.now()}`;
      });
     </script>
     <h1>Tor Browser Screenshot Acquisition</h1>
     <img id="firstImage">
     <p>Click here to start:
       <button id="acquire" onclick="acquire();">
-        Acquire!
+        Acquire all!
       </button>
     </p>
+    <div id="results">
+    </div>
   </body>
 </html>
