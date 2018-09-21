@@ -23,6 +23,7 @@
        } else {
          let { filename } = await request("prepare", { imageName, locale: "en-US", record: true });
          console.log(`recorded filename: ${filename}`);
+         document.getElementById("crop").style.display = "inline";
          let img1 = document.getElementById("first-screenshot");
          img1.src = filename;
          croppr1 = new Croppr(img1, { startSize: [90, 90, '%'] });
@@ -42,23 +43,24 @@
      };
     </script>
     <h1>Tor Browser Screenshot Setup</h1>
-    <h2>Paths</h2>
-    <p>Enter Tor Browser path: <input id="tbb-path"></input></p>
-    <p>Enter Tor Browser Manual path: <input id="tbb-path"></input></p>
-    <h2>Capture first screenshot (en-US)</h2>
-    <p>Enter screenshot name: <input id="screenshot-name"></input></p>
-    <p>
-      <button id="record" onclick="startRecording()">
-        Start recording
-      </button>
-      (Ctrl-Space to Stop and Take Screenshot)</p>
-    <h2>Crop screenshot (en-US)</h2>
-    <p>
-      Please drag the box to crop the image below. Click when you are done:
-      <button id="done-cropping" onclick="manualCropDone()">
-        Done
-      </button>
-      <img id="first-screenshot" src="" width="30%"></img>
-    </p>
+    <div id="capture">
+      <h2>Capture first screenshot (en-US)</h2>
+      <p>Enter screenshot name: <input id="screenshot-name"></input></p>
+      <p>
+        <button id="record" onclick="startRecording()">
+          Start recording
+        </button>
+        (Ctrl-Space to Stop and Take Screenshot)</p>
+    </div>
+    <div id="crop" style="display:none">
+      <h2>Crop screenshot (en-US)</h2>
+      <p>
+        Please drag the box to crop the image below. Click when you are done:
+        <button id="done-cropping" onclick="manualCropDone()">
+          Done
+        </button>
+        <img id="first-screenshot" src="" width="30%"></img>
+      </p>
+    </div>
   </body>
 </html>

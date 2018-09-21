@@ -61,6 +61,7 @@
      };
 
      let acquire = async () => {
+       let { imageName, x, y, w, h } = JSON.parse(document.cookie);
        let locales = await request("locales", { manual_dir: "../user-manual"});
        console.log(locales);
        let resultsHTML = "";
@@ -68,7 +69,7 @@
          resultsHTML +=
            `<hr>
              <p id="${locale}">
-              ${locale}
+              user-manual/${locale}/media/${imageName}.png
               <button class="recrop">Recrop</button>
               <button class="reacquire">Re-acquire</button>
               <button class="done" style="display:none">Done cropping</button>
@@ -79,14 +80,13 @@
          document.getElementById("results").innerHTML = resultsHTML;
        };
        await sleep(100);
-       let { imageName, x, y, w, h } = JSON.parse(document.cookie);
        for (let locale of locales) {
          document.querySelector(`p#${locale} button.reacquire`)
                  .addEventListener("click", () => reacquire({imageName, locale}));
          document.querySelector(`p#${locale} button.recrop`)
                  .addEventListener("click", () => recrop({imageName, locale}));
        }
-       for (let locale of locales.slice(0,1)) {
+       for (let locale of locales) {
          await request("acquire", { locale, imageName, x, y, w, h });
          await sleep(100);
          let imageSmall = document.querySelector(`p#${locale} img.small`);

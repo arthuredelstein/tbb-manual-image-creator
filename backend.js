@@ -29,7 +29,7 @@ let writeImageBuffer = (file, {buffer, width, height, bufferFormat }) =>
 
 let sleep = timeMs => new Promise(resolve => setTimeout(resolve, timeMs));
 
-let tor_browser_dir = "/home/arthur/Downloads/tor-browser_en-US";
+let tor_browser_dir = "../tor-browser_en-US";
 
 let get_firefox_version = async (path) => {
   let { stdout, stderr } = await exec(`${path}/Browser/firefox --version`);
