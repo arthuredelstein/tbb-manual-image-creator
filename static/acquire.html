@@ -97,6 +97,10 @@
        }
      };
 
+     let gitAdd = () => {
+       let { imageName } = JSON.parse(document.cookie);
+       await request("gitadd", { imageNAme);
+     }
 
      addEventListener("load", () => {
        let { imageName, x, y, w, h } = JSON.parse(document.cookie);
@@ -113,5 +117,8 @@
     </p>
     <div id="results">
     </div>
+    <button id="git-add" onclick="gitAdd();">
+      git add
+    </button>
   </body>
 </html>

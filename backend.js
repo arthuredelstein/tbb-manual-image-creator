@@ -125,10 +125,21 @@ let cropImage = async ({srcFile, destFile, x, y, w, h}) => {
   await new Promise(resolve => image.write(destFile, resolve));
 };
 
+let gitAdd = async ({imageName, manual_dir}) => {
+  let locales = await get_manual_locales(manual_dir);
+  for (let locale of locales) {
+    let { stdout, stderr } = await exec(
+      `git add ${path.join(locale, "media", imageName + ".png")}`,
+      { cwd: manual_dir }
+    );
+  }
+};
+
 module.exports = {
   acquireImageForLocale,
   cropImage,
   download_langpacks,
   get_manual_locales,
   recordInputSeries,
+  gitAdd,
 };
