@@ -128,10 +128,14 @@ let cropImage = async ({srcFile, destFile, x, y, w, h}) => {
 let gitAdd = async ({imageName, manual_dir}) => {
   let locales = await get_manual_locales(manual_dir);
   for (let locale of locales) {
-    let { stdout, stderr } = await exec(
-      `git add ${path.join(locale, "media", imageName + ".png")}`,
-      { cwd: manual_dir }
-    );
+    try {
+      let { stdout, stderr } = await exec(
+        `git add ${path.join(locale, "media", imageName + ".png")}`,
+        { cwd: manual_dir }
+      );
+    } catch (e) {
+      console.log(e);
+    }
   }
 };
 

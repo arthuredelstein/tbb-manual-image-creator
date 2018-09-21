@@ -97,9 +97,9 @@
        }
      };
 
-     let gitAdd = () => {
+     let gitAdd = async () => {
        let { imageName } = JSON.parse(document.cookie);
-       await request("gitadd", { imageNAme);
+       await request("gitadd", { imageName, manual_dir : "../user-manual" });
      }
 
      addEventListener("load", () => {
