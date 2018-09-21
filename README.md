@@ -1,16 +1,19 @@
 ## Setup
 
+First, run
+```
 sudo apt-get install libx11-dev libxtst-dev libpng-dev nodejs npm
+```
 
 Now install the `n` package and use it to get the latest nodejs:
+```
 sudo npm install -g n
 sudo n latest
-
+```
 There should be 3 directories in the same parent directory:
-
-user-manual (https://gitweb.torproject.org/tor-browser/user-manual.git/)
-tor-browser_en-US/ (download from https://torproject.org)
-tbb-manual-image-creator/ (This directory; https://github.com/arthuredelstein/tbb-manual-image-creator)
+ * user-manual (https://gitweb.torproject.org/tor-browser/user-manual.git/)
+ * tor-browser_en-US/ (download from https://torproject.org)
+ * tbb-manual-image-creator/ (This directory; https://github.com/arthuredelstein/tbb-manual-image-creator)
 
 ## Operation
 
