@@ -18,9 +18,11 @@ There should be 3 directories in the same parent directory:
 ## Operation
 
 Enter:
+```
   cd tbb-manul-image-creator
+  npm install
   npm start
-
+```
 If we are lucky, it should launch a browser window. The steps are as follows:
 
 1. Enter screenshot name. This should describe what feature you want to illustrate. For example "circuit_display" or "security_slider". (Don't use spaces because this will be part of a filename.)
