@@ -1,23 +1,28 @@
 ## Setup
 
+First, run
+```
 sudo apt-get install libx11-dev libxtst-dev libpng-dev nodejs npm
+```
 
 Now install the `n` package and use it to get the latest nodejs:
+```
 sudo npm install -g n
 sudo n latest
-
+```
 There should be 3 directories in the same parent directory:
-
-user-manual (https://gitweb.torproject.org/tor-browser/user-manual.git/)
-tor-browser_en-US/ (download from https://torproject.org)
-tbb-manual-image-creator/ (This directory; https://github.com/arthuredelstein/tbb-manual-image-creator)
+ * user-manual (https://gitweb.torproject.org/tor-browser/user-manual.git/)
+ * tor-browser_en-US/ (download from https://torproject.org)
+ * tbb-manual-image-creator/ (This directory; https://github.com/arthuredelstein/tbb-manual-image-creator)
 
 ## Operation
 
 Enter:
+```
   cd tbb-manul-image-creator
+  npm install
   npm start
-
+```
 If we are lucky, it should launch a browser window. The steps are as follows:
 
 1. Enter screenshot name. This should describe what feature you want to illustrate. For example "circuit_display" or "security_slider". (Don't use spaces because this will be part of a filename.)
