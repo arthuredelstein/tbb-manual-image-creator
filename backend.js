@@ -49,6 +49,7 @@ let get_manual_locales = async (manual_dir) =>
 
 let langpack_urls = async (version) => {
   let baseUrl = `https://ftp.mozilla.org/pub/firefox/releases/${version}esr/linux-x86_64/xpi/`;
+  console.log(`Download ${baseUrl}`);
   let indexPage = await request(baseUrl);
   let dom = new JSDOM(indexPage);
   let items = [...dom.window.document.querySelectorAll("table tr td a")]

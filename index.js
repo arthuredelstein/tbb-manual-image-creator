@@ -2,7 +2,7 @@ const path = require('path');
 const opn = require('opn');
 const { acquireImageForLocale, recordInputSeries,
         cropImage, get_manual_locales,
-        gitAdd
+        gitAdd, download_langpacks
       } = require('./backend.js');
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -83,9 +83,9 @@ app.post("/gitadd", async (req, res) => {
   await gitAdd({ imageName, manual_dir });
 });
 
-app.listen(port, () => {
+app.listen(port, async () => {
+  await download_langpacks("60.2.2");
   console.log(`Listening on port ${port}!`);
   opn("http://localhost:3000");
 });
-
 
